@@ -60,9 +60,24 @@ class ApiClient {
         const response = await fetch(url, config)
 
         if (!response.ok) {
-            const error = await response.text()
+            // Пробуем получить JSON с ошибкой
+            let errorMessage = `Ошибка ${response.status}: ${response.statusText}`
 
-            throw new Error(`API error: ${response.status} - ${error}`)
+            try {
+                const errorData = await response.json()
+                // Используем поле detail из ответа сервера, если оно есть
+                errorMessage = errorData.detail || errorData.message || JSON.stringify(errorData)
+            } catch {
+                // Если не удалось распарсить JSON, используем текст
+                try {
+                    const text = await response.text()
+                    errorMessage = text || errorMessage
+                } catch {
+                    // Оставляем дефолтное сообщение
+                }
+            }
+
+            throw new Error(errorMessage)
         }
 
         return response.json()

@@ -56,7 +56,17 @@ const AdminDashboard = () => {
         role: 'teacher' as 'teacher' | 'admin',
     })
     const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set())
-    const [praiseToDelete, setPraiseToDelete] = useState<string | null>(null)
+    const [deleteDialog, setDeleteDialog] = useState<{
+        isOpen: boolean
+        type: 'teacher' | 'praise' | null
+        id: string | null
+        name: string | null
+    }>({
+        isOpen: false,
+        type: null,
+        id: null,
+        name: null,
+    })
 
     // Проверяем авторизацию при загрузке
     useEffect(() => {
@@ -130,6 +140,12 @@ const AdminDashboard = () => {
         onSuccess: () => {
             toast.success('Учитель удален')
             refetchTeachers()
+            setDeleteDialog({
+                isOpen: false,
+                type: null,
+                id: null,
+                name: null,
+            })
         },
         onError: (error: Error) => {
             toast.error('Ошибка удаления', {
@@ -143,7 +159,12 @@ const AdminDashboard = () => {
         onSuccess: () => {
             toast.success('Сообщение удалено')
             refetchPraises()
-            setPraiseToDelete(null)
+            setDeleteDialog({
+                isOpen: false,
+                type: null,
+                id: null,
+                name: null,
+            })
         },
         onError: (error: Error) => {
             toast.error('Ошибка удаления', {
@@ -191,6 +212,25 @@ const AdminDashboard = () => {
         })
     }
 
+    const openDeleteDialog = (type: 'teacher' | 'praise', id: string, name: string) => {
+        setDeleteDialog({
+            isOpen: true,
+            type,
+            id,
+            name,
+        })
+    }
+
+    const handleDelete = () => {
+        if (!deleteDialog.id) return
+
+        if (deleteDialog.type === 'teacher') {
+            deleteTeacherMutation.mutate(deleteDialog.id)
+        } else if (deleteDialog.type === 'praise') {
+            deletePraiseMutation.mutate(deleteDialog.id)
+        }
+    }
+
     const filteredTeachers = teachers?.filter(
         teacher =>
             teacher.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,7 +274,7 @@ const AdminDashboard = () => {
                             <div className='flex items-center space-x-2'>
                                 <span className='text-muted-foreground'>Администратор</span>
                                 <span className='px-2 py-1 text-xs bg-primary/20 text-primary rounded-full'>
-                  Admin
+                  Админ
                 </span>
                             </div>
                         </div>
@@ -498,15 +538,9 @@ const AdminDashboard = () => {
                                                     <Button
                                                         variant='ghost'
                                                         size='sm'
-                                                        onClick={() => {
-                                                            if (
-                                                                window.confirm(
-                                                                    `Удалить учителя ${teacher.full_name}?`,
-                                                                )
-                                                            ) {
-                                                                deleteTeacherMutation.mutate(teacher.id)
-                                                            }
-                                                        }}
+                                                        onClick={() =>
+                                                            openDeleteDialog('teacher', teacher.id, teacher.full_name)
+                                                        }
                                                         disabled={deleteTeacherMutation.isPending}
                                                     >
                                                         <Trash2 className='w-4 h-4 text-red-500'/>
@@ -637,7 +671,10 @@ const AdminDashboard = () => {
                                                         <Button
                                                             variant='ghost'
                                                             size='sm'
-                                                            onClick={() => setPraiseToDelete(praise.id)}
+                                                            onClick={() =>
+                                                                openDeleteDialog('praise', praise.id, 'Сообщение')
+                                                            }
+                                                            disabled={deletePraiseMutation.isPending}
                                                         >
                                                             <Trash2 className='w-4 h-4 text-red-500'/>
                                                         </Button>
@@ -653,33 +690,55 @@ const AdminDashboard = () => {
                 </Tabs>
             </div>
 
-            {/* Диалог подтверждения удаления сообщения */}
-            <Dialog open={!!praiseToDelete} onOpenChange={() => setPraiseToDelete(null)}>
+            {/* Единый диалог подтверждения удаления */}
+            <Dialog
+                open={deleteDialog.isOpen}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setDeleteDialog({
+                            isOpen: false,
+                            type: null,
+                            id: null,
+                            name: null,
+                        })
+                    }
+                }}
+            >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Удалить сообщение</DialogTitle>
+                        <DialogTitle>
+                            Удалить {deleteDialog.type === 'teacher' ? 'учителя' : 'сообщение'}?
+                        </DialogTitle>
                         <DialogDescription>
-                            Вы уверены, что хотите удалить это сообщение? Это действие нельзя отменить.
+                            {deleteDialog.type === 'teacher' ? (
+                                <>Вы уверены, что хотите удалить учителя <strong>{deleteDialog.name}</strong>? Это
+                                    действие нельзя отменить.</>
+                            ) : (
+                                <>Вы уверены, что хотите удалить это сообщение? Это действие нельзя отменить.</>
+                            )}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
                         <Button
                             variant='outline'
-                            onClick={() => setPraiseToDelete(null)}
-                            disabled={deletePraiseMutation.isPending}
+                            onClick={() => {
+                                setDeleteDialog({
+                                    isOpen: false,
+                                    type: null,
+                                    id: null,
+                                    name: null,
+                                })
+                            }}
+                            disabled={deleteTeacherMutation.isPending || deletePraiseMutation.isPending}
                         >
                             Отмена
                         </Button>
                         <Button
                             variant='destructive'
-                            onClick={() => {
-                                if (praiseToDelete) {
-                                    deletePraiseMutation.mutate(praiseToDelete)
-                                }
-                            }}
-                            disabled={deletePraiseMutation.isPending}
+                            onClick={handleDelete}
+                            disabled={deleteTeacherMutation.isPending || deletePraiseMutation.isPending}
                         >
-                            {deletePraiseMutation.isPending ? 'Удаление...' : 'Удалить'}
+                            {(deleteTeacherMutation.isPending || deletePraiseMutation.isPending) ? 'Удаление...' : 'Удалить'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
