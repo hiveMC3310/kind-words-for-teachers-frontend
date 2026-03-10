@@ -41,6 +41,7 @@ import {
 import {useEffect, useState, useMemo} from 'react'
 import {useNavigate} from 'react-router-dom'
 import {toast} from 'sonner'
+import {ThemeToggle} from "@/components/ui/themetoggle.tsx";
 
 const AdminDashboard = () => {
     const navigate = useNavigate()

@@ -6,7 +6,8 @@ import {apiClient} from '@/lib/api'
 import {useQuery} from '@tanstack/react-query'
 import {ArrowLeft, GraduationCap, Search} from 'lucide-react' // Добавляем иконку Search
 import {useNavigate} from 'react-router-dom'
-import {useState, useMemo} from 'react' // Добавляем хуки для состояния и мемоизации
+import {useState, useMemo} from 'react'
+import {ThemeToggle} from "@/components/ui/themetoggle.tsx"; // Добавляем хуки для состояния и мемоизации
 
 const TeacherList = () => {
     const navigate = useNavigate()
