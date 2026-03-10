@@ -44,7 +44,7 @@ class ApiClient {
 		endpoint: string,
 		options: RequestInit = {},
 	): Promise<T> {
-		const url = `/api/${endpoint}`
+		const url = `/api${endpoint}`
 
 		const token = sessionStorage.getItem('teacher_token')
 
