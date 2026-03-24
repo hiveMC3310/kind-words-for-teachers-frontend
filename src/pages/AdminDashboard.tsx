@@ -1,5 +1,6 @@
-import {Button} from '@/components/ui/button'
-import {Card} from '@/components/ui/card'
+import MessageCell from '@/components/MessageCell'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import {
     Dialog,
     DialogContent,
@@ -9,9 +10,9 @@ import {
     DialogTitle,
     DialogTrigger,
 } from '@/components/ui/dialog'
-import {Input} from '@/components/ui/input'
-import {Label} from '@/components/ui/label'
-import {Skeleton} from '@/components/ui/skeleton'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Skeleton } from '@/components/ui/skeleton'
 import {
     Table,
     TableBody,
@@ -20,13 +21,11 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import {Tabs, TabsContent, TabsList, TabsTrigger} from '@/components/ui/tabs'
-import {apiClient, Teacher, PraiseMessage} from '@/lib/api'
-import {useMutation, useQuery, useQueryClient} from '@tanstack/react-query'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { apiClient, Teacher } from '@/lib/api'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
     BarChart3,
-    ChevronDown,
-    ChevronUp,
     Eye,
     EyeOff,
     GraduationCap,
@@ -36,12 +35,11 @@ import {
     Plus,
     Search,
     Trash2,
-    Users,
+    Users
 } from 'lucide-react'
-import {useEffect, useState, useMemo} from 'react'
-import {useNavigate} from 'react-router-dom'
-import {toast} from 'sonner'
-import {ThemeToggle} from "@/components/ui/themetoggle.tsx";
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { toast } from 'sonner'
 
 const AdminDashboard = () => {
     const navigate = useNavigate()
@@ -611,11 +609,6 @@ const AdminDashboard = () => {
                                     ) : (
                                         filteredPraises?.map(praise => {
                                             const teacher = teacherMap.get(praise.teacher_id)
-                                            const isExpanded = expandedMessages.has(praise.id)
-                                            const messagePreview = praise.message.length > 100 && !isExpanded
-                                                ? praise.message.substring(0, 100) + '...'
-                                                : praise.message
-
                                             return (
                                                 <TableRow key={praise.id}>
                                                     <TableCell>
@@ -644,29 +637,11 @@ const AdminDashboard = () => {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell className='max-w-xs'>
-                                                        <div className={`${isExpanded ? '' : 'truncate'}`}>
-                                                            {messagePreview}
-                                                        </div>
-                                                        {praise.message.length > 100 && (
-                                                            <Button
-                                                                variant='link'
-                                                                size='sm'
-                                                                onClick={() => toggleMessageExpanded(praise.id)}
-                                                                className='p-0 h-auto text-xs text-muted-foreground'
-                                                            >
-                                                                {isExpanded ? (
-                                                                    <>
-                                                                        <ChevronUp className='w-3 h-3 mr-1'/>
-                                                                        Свернуть
-                                                                    </>
-                                                                ) : (
-                                                                    <>
-                                                                        <ChevronDown className='w-3 h-3 mr-1'/>
-                                                                        Прочитать полностью
-                                                                    </>
-                                                                )}
-                                                            </Button>
-                                                        )}
+                                                        <MessageCell
+                                                            message={praise.message}
+                                                            isExpanded={expandedMessages.has(praise.id)}
+                                                            onToggle={() => toggleMessageExpanded(praise.id)}
+                                                        />
                                                     </TableCell>
                                                     <TableCell className='text-right'>
                                                         <Button
