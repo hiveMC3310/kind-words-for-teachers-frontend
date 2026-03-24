@@ -3,6 +3,7 @@
     {
       "source": "/api/(.*)",
       "destination": "http://155.212.186.85:8000/$1"
-    }
+    },
+    { "source": "/(.*)", "destination": "/" }
   ]
 }
