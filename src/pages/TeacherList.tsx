@@ -1,13 +1,12 @@
 import {Button} from '@/components/ui/button'
 import {Card} from '@/components/ui/card'
-import {Input} from '@/components/ui/input' // Добавляем импорт Input
+import {Input} from '@/components/ui/input'
 import {Skeleton} from '@/components/ui/skeleton'
 import {apiClient} from '@/lib/api'
 import {useQuery} from '@tanstack/react-query'
-import {ArrowLeft, GraduationCap, Search} from 'lucide-react' // Добавляем иконку Search
+import {ArrowLeft, GraduationCap, Search} from 'lucide-react'
 import {useNavigate} from 'react-router-dom'
 import {useState, useMemo} from 'react'
-import {ThemeToggle} from "@/components/ui/themetoggle.tsx"; // Добавляем хуки для состояния и мемоизации
 
 const TeacherList = () => {
     const navigate = useNavigate()
